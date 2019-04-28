@@ -1,17 +1,28 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"gocrawl/crawler"
 	"gocrawl/sitemap"
 )
 
 func main() {
-	url := "https://monzo.com"
+	parallel_fetchers := flag.Int("n", 32, "number of parallel coroutines")
+	flag.Parse()
+
+	if len(flag.Args()) == 0 {
+		fmt.Println("gocrawl is a simple Web Crawler.\n")
+		fmt.Println("Usage:\n\tgocrawl -n <number of parallel coroutines> [site url]")
+		return
+	}
+
+	url := flag.Args()[0]
+
 	sitemap := sitemap.Create()
+	fetch_limiter := make(chan int, *parallel_fetchers)
 
-	concurrency_limiter := make(chan int, 1)
-
-	crawler.Crawl(url, &sitemap, concurrency_limiter)
+	crawler.Crawl(url, &sitemap, fetch_limiter)
 
 	sitemap.Print()
 }
