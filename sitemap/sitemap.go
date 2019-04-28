@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+// Sitemap represented as a thread-safe HashSet.
+// All syncronization happens under the hood using RWMutex to keep sync of shared mutable state inside black box.
 type Sitemap struct {
 	urls map[string]bool
 	lock sync.RWMutex
@@ -24,7 +26,7 @@ func (s *Sitemap) Contains(url string) bool {
 	s.lock.RLock()
 	_, ok := s.urls[url]
 	s.lock.RUnlock()
-	
+
 	return ok
 }
 
@@ -35,7 +37,6 @@ func (s *Sitemap) Size() int {
 
 	return size
 }
-
 
 func (s *Sitemap) Print() {
 	s.lock.RLock()
