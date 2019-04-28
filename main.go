@@ -12,7 +12,7 @@ func main() {
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
-		fmt.Println("gocrawl is a simple Web Crawler.\n")
+		fmt.Println("gocrawl is a simple Web Crawler.")
 		fmt.Println("Usage:\n\tgocrawl -n <number of parallel coroutines> [site url]")
 		return
 	}
