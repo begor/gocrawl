@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"gocrawl/fetcher"
 	"gocrawl/crawler"
 	"gocrawl/sitemap"
 )
@@ -20,9 +21,9 @@ func main() {
 	url := flag.Args()[0]
 
 	sitemap := sitemap.Create()
-	fetch_limiter := make(chan int, *parallel_fetchers)
+	fetcher := fetcher.CreateHTTPFetcher(*parallel_fetchers)
 
-	crawler.Crawl(url, &sitemap, fetch_limiter)
+	crawler.Crawl(url, &fetcher, &sitemap)
 
 	sitemap.Print()
 }

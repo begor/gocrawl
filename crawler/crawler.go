@@ -2,10 +2,10 @@ package crawler
 
 import (
 	"fmt"
+	"gocrawl/fetcher"
 	"gocrawl/parser"
 	"gocrawl/sitemap"
 	"log"
-	"net/http"
 	"net/url"
 )
 
@@ -14,7 +14,7 @@ import (
 // 1) fetch document from url_str if fetch_limiter is available or block 
 // 2) parse links from document using parser package
 // 3) run DFS on links using crawlChilderLinks
-func Crawl(url_str string, sitemap *sitemap.Sitemap, fetch_limiter chan int) {
+func Crawl(url_str string, fetcher fetcher.Fetcher, sitemap *sitemap.Sitemap) {
 	fmt.Println("Crawling: ", url_str)
 
 	current_url, err := url.Parse(url_str)
@@ -30,33 +30,19 @@ func Crawl(url_str string, sitemap *sitemap.Sitemap, fetch_limiter chan int) {
 
 	sitemap.Add(url_str)
 
-	response := fetch(url_str, fetch_limiter)
-	links := parser.ExtractLinksWithCurrentHost(current_url, response.Body)
+	response := fetcher.Get(url_str)
+	links := parser.ExtractLinksWithCurrentHost(current_url, response)
 
-	crawlChilderLinks(links, sitemap, fetch_limiter)
+	crawlChilderLinks(links, fetcher, sitemap)
 }
 
 
-func fetch(url string, fetch_limiter chan int) *http.Response {
-	fetch_limiter <- 1
-
-	res, err := http.Get(url)
-
-	<-fetch_limiter
-
-	if err != nil {
-		log.Fatal("Unable to fetch ", url)
-	}
-
-	return res
-}
-
-func crawlChilderLinks(links []string, sitemap *sitemap.Sitemap, fetch_limiter chan int) {
+func crawlChilderLinks(links []string, fetcher fetcher.Fetcher, sitemap *sitemap.Sitemap) {
 	children_queue := make(chan bool)
 
 	for _, link := range links {
 		go func(link string) {
-			Crawl(link, sitemap, fetch_limiter)
+			Crawl(link, fetcher, sitemap)
 			children_queue <- true
 		}(link)
 	}

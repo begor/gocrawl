@@ -9,9 +9,8 @@ import (
 )
 
 
-func ExtractLinksWithCurrentHost(current_url *url.URL, reader io.ReadCloser) []string {
+func ExtractLinksWithCurrentHost(current_url *url.URL, reader io.Reader) []string {
 	doc, err := goquery.NewDocumentFromReader(reader)
-	reader.Close()
 
 	if err != nil {
 		log.Fatal("Unable to read document")

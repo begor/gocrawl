@@ -4,16 +4,14 @@ import (
 	"testing"
 	"strings"
 	"net/url"
-	"io/ioutil"
 )
 
 
 func TestReaderWithoutLinksString(t *testing.T) {
 	reader := strings.NewReader("This is a page without links")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 
 	if len(links) != 0 {
 		t.Error("Expected 0, got ", len(links))
@@ -23,10 +21,9 @@ func TestReaderWithoutLinksString(t *testing.T) {
 
 func TestReaderWithoutLinksHTML(t *testing.T) {
 	reader := strings.NewReader("<ab></ab>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 
 	if len(links) != 0 {
 		t.Error("Expected 0, got ", len(links))
@@ -36,10 +33,9 @@ func TestReaderWithoutLinksHTML(t *testing.T) {
 
 func TestReaderOneLinkDifferentHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://not-a-test.com/page/\"></a>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 
 	if len(links) != 0 {
 		t.Error("Expected 0, got ", len(links))
@@ -49,11 +45,10 @@ func TestReaderOneLinkDifferentHost(t *testing.T) {
 
 func TestReaderOneLinkSameHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://test.com/page/\"></a>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 	expected_link := "https://test.com/page/"
 
 	if len(links) != 1 || links[0] != expected_link {
@@ -64,10 +59,9 @@ func TestReaderOneLinkSameHost(t *testing.T) {
 
 func TestReaderOneLinkRelativeSimple(t *testing.T) {
 	reader := strings.NewReader("<a href=\"/page/\"></a>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 	expected_link := "https://test.com/page/"
 
 	if len(links) != 1 || links[0] != expected_link {
@@ -78,10 +72,9 @@ func TestReaderOneLinkRelativeSimple(t *testing.T) {
 
 func TestReaderOneLinkRelativeComplex(t *testing.T) {
 	reader := strings.NewReader("<a href=\"/page/temp/../42/\"></a>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 	expected_link := "https://test.com/page/42/"
 
 	if len(links) != 1 || links[0] != expected_link {
@@ -92,10 +85,9 @@ func TestReaderOneLinkRelativeComplex(t *testing.T) {
 
 func TestReaderTwoLinksWithSameHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://test.com/page/\"></a><a href=\"https://test.com/another/page/\"></a>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 	expected_link1 := "https://test.com/page/"
 	expected_link2 := "https://test.com/another/page/"
 
@@ -107,10 +99,9 @@ func TestReaderTwoLinksWithSameHost(t *testing.T) {
 
 func TestReaderTwoLinksRelative(t *testing.T) {
 	reader := strings.NewReader("<a href=\"/page/\"></a><a href=\"/another/42/../page/\"></a>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 	expected_link1 := "https://test.com/page/"
 	expected_link2 := "https://test.com/another/page/"
 
@@ -122,10 +113,9 @@ func TestReaderTwoLinksRelative(t *testing.T) {
 
 func TestReaderTwoLinksOneDifferentHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://not-a-test.com/page/\"></a><a href=\"/another/42/../page/\"></a>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 	expected_link := "https://test.com/another/page/"
 
 	if len(links) != 1 || links[0] != expected_link {
@@ -136,10 +126,9 @@ func TestReaderTwoLinksOneDifferentHost(t *testing.T) {
 
 func TestReaderTwoLinksTwoDifferentHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://not-a-test.com/page/\"></a><a href=\"https://not-a-test.com/\"></a>")
-	stringReadCloser := ioutil.NopCloser(reader)
 	url := url.URL{Host: "test.com", Scheme: "https"}
 
-	links := ExtractLinksWithCurrentHost(&url, stringReadCloser)
+	links := ExtractLinksWithCurrentHost(&url, reader)
 
 	if len(links) != 0 {
 		t.Error("Expected 0 got ", links)
