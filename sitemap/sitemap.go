@@ -8,11 +8,10 @@ import (
 // Sitemap represented as a thread-safe HashSet.
 // All syncronization happens under the hood using RWMutex to keep sync of shared mutable state inside black box.
 type Sitemap struct {
-	urls map[string][]string
+	urls   map[string][]string
 	errors map[string]error
-	lock sync.RWMutex
+	lock   sync.RWMutex
 }
-
 
 func Create() Sitemap {
 	return Sitemap{urls: make(map[string][]string), errors: make(map[string]error), lock: sync.RWMutex{}}
@@ -20,7 +19,7 @@ func Create() Sitemap {
 
 func (s *Sitemap) MarkVisited(url string) {
 	s.lock.Lock()
-	
+
 	if _, ok := s.urls[url]; !ok {
 		s.urls[url] = nil
 	}
@@ -76,13 +75,17 @@ func (s *Sitemap) ErrSize() int {
 	return size
 }
 
-func (s *Sitemap) PrintReport() {
+func (s *Sitemap) PrintReport(short_view bool) {
 	s.lock.RLock()
-	
+
 	fmt.Println("Succesfully crawled ", s.Size(), " pages")
-	
+
 	for url, links := range s.urls {
 		fmt.Println(url)
+
+		if short_view {
+			continue
+		}
 
 		for _, link := range links {
 			fmt.Println("\t-", link)
@@ -94,6 +97,6 @@ func (s *Sitemap) PrintReport() {
 	for url, error := range s.errors {
 		fmt.Println(url, ": ", error)
 	}
-	
+
 	s.lock.RUnlock()
 }
