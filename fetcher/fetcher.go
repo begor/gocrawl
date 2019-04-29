@@ -3,9 +3,9 @@ package fetcher
 import (
 	"bytes"
 	"io"
-	"time"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/op/go-logging"
 )
@@ -18,7 +18,7 @@ type Fetcher interface {
 
 type HTTPLimitFetcher struct {
 	sem_chan chan int
-	client *http.Client
+	client   *http.Client
 }
 
 func CreateHTTPFetcher(limit int, timeout_sec int) HTTPLimitFetcher {
@@ -26,7 +26,7 @@ func CreateHTTPFetcher(limit int, timeout_sec int) HTTPLimitFetcher {
 	timeout := time.Duration(time.Duration(timeout_sec) * time.Second)
 
 	client := http.Client{
-	    Timeout: timeout,
+		Timeout: timeout,
 	}
 
 	return HTTPLimitFetcher{sem_chan: sem_chan, client: &client}

@@ -8,9 +8,7 @@ import (
 	"github.com/op/go-logging"
 )
 
-
 var log = logging.MustGetLogger("parser")
-
 
 func ExtractLinksWithCurrentHost(current_url *url.URL, reader io.Reader) ([]string, error) {
 	doc, err := goquery.NewDocumentFromReader(reader)

@@ -31,7 +31,7 @@ func main() {
 	parallel_fetchers := flag.Int("n", 32, "Number of parallel coroutines")
 	short_view := flag.Bool("s", false, "Short view (without page links)")
 	debug := flag.Bool("d", false, "Enable verbose DEBUG logging")
-	
+
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
