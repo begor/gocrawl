@@ -47,7 +47,6 @@ func (s *Sitemap) AddLinks(url string, links []string) {
 func (s *Sitemap) AddError(url string, err error) {
 	s.lock.Lock()
 
-	delete(s.urls, url)
 	s.errors[url] = err
 
 	s.lock.Unlock()
@@ -78,9 +77,10 @@ func (s *Sitemap) ErrSize() int {
 }
 
 func (s *Sitemap) PrintReport() {
-	fmt.Println("Succesfully crawled ", s.Size(), " pages")
-
 	s.lock.RLock()
+	
+	fmt.Println("Succesfully crawled ", s.Size(), " pages")
+	
 	for url, links := range s.urls {
 		fmt.Println(url)
 
@@ -89,11 +89,11 @@ func (s *Sitemap) PrintReport() {
 		}
 	}
 
-	fmt.Println("Got ", s.ErrSize(), " errors")
+	fmt.Println("\n\n\nGot ", s.ErrSize(), " errors")
 
-	s.lock.RLock()
 	for url, error := range s.errors {
 		fmt.Println(url, ": ", error)
 	}
+	
 	s.lock.RUnlock()
 }
