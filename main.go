@@ -12,33 +12,41 @@ import (
 
 var log = logging.MustGetLogger("main")
 
-func setupLogging() {
+func setupLogging(debug bool) {
 	var format = logging.MustStringFormatter(
-		`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.1s} %{color:reset} %{message}`,
+		`%{color}%{time} %{shortfunc} ▶ %{level:.1s} %{color:reset} %{message}`,
 	)
 
 	logging.SetFormatter(format)
+
+	if debug {
+		logging.SetLevel(logging.DEBUG, "")
+	} else {
+		logging.SetLevel(logging.INFO, "")
+	}
 }
 
 func main() {
-	parallel_fetchers := flag.Int("n", 32, "Number of parallel coroutines.")
-	short_view := flag.Bool("s", false, "Short view (without page links).")
+	parallel_fetchers := flag.Int("n", 32, "Number of parallel coroutines")
+	short_view := flag.Bool("s", false, "Short view (without page links)")
+	debug := flag.Bool("d", false, "Enable verbose DEBUG logging")
+	
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
 		fmt.Println("gocrawl is a simple Web Crawler.")
-		fmt.Println("Usage:\n\tgocrawl -n <number of parallel coroutines> [site url]")
+		fmt.Println("Usage:\n\tgocrawl <options> [site url]")
 		return
 	}
 
 	url := flag.Args()[0]
 
-	setupLogging()
+	setupLogging(*debug)
 
 	sitemap := sitemap.Create()
 	fetcher := fetcher.CreateHTTPFetcher(*parallel_fetchers)
 
-	log.Info("Starting Crawler with ", *parallel_fetchers, " concurrent fetchers")
+	log.Info("Starting Crawler with", *parallel_fetchers, "concurrent fetchers")
 
 	start := time.Now()
 	crawler.Crawl(url, &fetcher, &sitemap)
@@ -46,7 +54,7 @@ func main() {
 
 	elapsed := fin.Sub(start)
 
-	log.Info("Crawler done at ", elapsed, " seconds!")
+	log.Info("Crawler done at", elapsed, "seconds!")
 
 	sitemap.PrintReport(*short_view)
 }

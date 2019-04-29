@@ -5,7 +5,11 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/op/go-logging"
 )
+
+var log = logging.MustGetLogger("fetcher")
 
 type Fetcher interface {
 	Get(string) (io.Reader, error)
@@ -29,7 +33,7 @@ func (fetcher *HTTPLimitFetcher) Get(url string) (io.Reader, error) {
 	<-fetcher.sem_chan
 
 	if err != nil {
-		// TODO: log.Warn
+		log.Warning("Unable to fetch", url, err)
 		return nil, err
 	}
 
