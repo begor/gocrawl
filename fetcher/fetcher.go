@@ -3,6 +3,7 @@ package fetcher
 import (
 	"bytes"
 	"io"
+	"time"
 	"io/ioutil"
 	"net/http"
 
@@ -17,18 +18,24 @@ type Fetcher interface {
 
 type HTTPLimitFetcher struct {
 	sem_chan chan int
+	client *http.Client
 }
 
-func CreateHTTPFetcher(limit int) HTTPLimitFetcher {
+func CreateHTTPFetcher(limit int, timeout_sec int) HTTPLimitFetcher {
 	sem_chan := make(chan int, limit)
+	timeout := time.Duration(time.Duration(timeout_sec) * time.Second)
 
-	return HTTPLimitFetcher{sem_chan: sem_chan}
+	client := http.Client{
+	    Timeout: timeout,
+	}
+
+	return HTTPLimitFetcher{sem_chan: sem_chan, client: &client}
 }
 
 func (fetcher *HTTPLimitFetcher) Get(url string) (io.Reader, error) {
 	fetcher.sem_chan <- 1
 
-	res, err := http.Get(url)
+	res, err := fetcher.client.Get(url)
 
 	<-fetcher.sem_chan
 

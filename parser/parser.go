@@ -5,13 +5,18 @@ import (
 	"net/url"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/op/go-logging"
 )
+
+
+var log = logging.MustGetLogger("parser")
+
 
 func ExtractLinksWithCurrentHost(current_url *url.URL, reader io.Reader) ([]string, error) {
 	doc, err := goquery.NewDocumentFromReader(reader)
 
 	if err != nil {
-		// TODO: log.Warn
+		log.Warning("Unable to parse document from ", current_url.String())
 		return nil, err
 	}
 
@@ -29,16 +34,18 @@ func ExtractLinksWithCurrentHost(current_url *url.URL, reader io.Reader) ([]stri
 			href_url, err := url.Parse(href)
 
 			if err != nil {
-				// TODO: log.Warn
+				log.Warning("Unable to parse URL of", href)
 				continue
 			}
 
 			full_url := current_url.ResolveReference(href_url)
 
 			if full_url.Host != current_url.Host {
+				log.Debug("URL from foreign host", full_url.Host)
 				continue
 			}
 
+			// Don't care about it in crawling
 			full_url.Fragment = ""
 			full_url.RawQuery = ""
 

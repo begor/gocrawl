@@ -27,6 +27,7 @@ func setupLogging(debug bool) {
 }
 
 func main() {
+	http_timeout := flag.Int("t", 10, "Timeout in seconds for HTTP fetching")
 	parallel_fetchers := flag.Int("n", 32, "Number of parallel coroutines")
 	short_view := flag.Bool("s", false, "Short view (without page links)")
 	debug := flag.Bool("d", false, "Enable verbose DEBUG logging")
@@ -44,7 +45,7 @@ func main() {
 	setupLogging(*debug)
 
 	sitemap := sitemap.Create()
-	fetcher := fetcher.CreateHTTPFetcher(*parallel_fetchers)
+	fetcher := fetcher.CreateHTTPFetcher(*parallel_fetchers, *http_timeout)
 
 	log.Info("Starting Crawler with", *parallel_fetchers, "concurrent fetchers")
 
