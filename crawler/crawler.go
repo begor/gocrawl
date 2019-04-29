@@ -31,7 +31,7 @@ func Crawl(url_str string, fetcher fetcher.Fetcher, sitemap *sitemap.Sitemap) {
 	if err != nil {
 		log.Warning("Unable to get URL of ", url_str, err)
 
-		sitemap.AddError(url_str, err)
+		sitemap.SetError(url_str, err)
 		return
 	}
 
@@ -40,7 +40,7 @@ func Crawl(url_str string, fetcher fetcher.Fetcher, sitemap *sitemap.Sitemap) {
 	if err != nil {
 		log.Warning("Unable to fetch from ", url_str, err)
 
-		sitemap.AddError(url_str, err)
+		sitemap.SetError(url_str, err)
 		return
 	}
 
@@ -49,11 +49,11 @@ func Crawl(url_str string, fetcher fetcher.Fetcher, sitemap *sitemap.Sitemap) {
 	if err != nil {
 		log.Warning("Unable to extract links from ", url_str, err)
 
-		sitemap.AddError(url_str, err)
+		sitemap.SetError(url_str, err)
 		return
 	}
 
-	sitemap.AddLinks(url_str, links)
+	sitemap.SetLinks(url_str, links)
 
 	crawlChilderLinks(links, fetcher, sitemap)
 }

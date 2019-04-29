@@ -21,31 +21,32 @@ func (s *Sitemap) MarkVisited(url string) {
 	s.lock.Lock()
 
 	if _, ok := s.urls[url]; !ok {
-		s.urls[url] = nil
+		s.urls[url] = make([]string, 0)
 	}
 
 	s.lock.Unlock()
 }
 
-func (s *Sitemap) AddLinks(url string, links []string) {
+func (s *Sitemap) SetLinks(url string, links []string) {
 	s.lock.Lock()
 
-	if val, ok := s.urls[url]; !ok {
-		s.urls[url] = links
-	} else {
-		if val != nil {
-			s.urls[url] = append(s.urls[url], links...)
-		} else {
-			s.urls[url] = links
-		}
-	}
+	s.urls[url] = links
 
 	s.lock.Unlock()
 }
 
-func (s *Sitemap) AddError(url string, err error) {
+func (s *Sitemap) GetLinks(url string) ([]string, bool) {
+	s.lock.RLock()
+	val, ok := s.urls[url]
+	s.lock.RUnlock()
+
+	return val, ok
+}
+
+func (s *Sitemap) SetError(url string, err error) {
 	s.lock.Lock()
 
+	delete(s.urls, url)
 	s.errors[url] = err
 
 	s.lock.Unlock()
