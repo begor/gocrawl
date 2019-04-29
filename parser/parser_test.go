@@ -1,11 +1,10 @@
 package parser
 
 import (
-	"testing"
-	"strings"
 	"net/url"
+	"strings"
+	"testing"
 )
-
 
 func TestReaderWithoutLinksString(t *testing.T) {
 	reader := strings.NewReader("This is a page without links")
@@ -18,7 +17,6 @@ func TestReaderWithoutLinksString(t *testing.T) {
 	}
 }
 
-
 func TestReaderWithoutLinksHTML(t *testing.T) {
 	reader := strings.NewReader("<ab></ab>")
 	url := url.URL{Host: "test.com", Scheme: "https"}
@@ -29,7 +27,6 @@ func TestReaderWithoutLinksHTML(t *testing.T) {
 		t.Error("Expected 0, got ", len(links))
 	}
 }
-
 
 func TestReaderOneLinkDifferentHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://not-a-test.com/page/\"></a>")
@@ -42,11 +39,9 @@ func TestReaderOneLinkDifferentHost(t *testing.T) {
 	}
 }
 
-
 func TestReaderOneLinkSameHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://test.com/page/\"></a>")
 	url := url.URL{Host: "test.com", Scheme: "https"}
-
 
 	links := ExtractLinksWithCurrentHost(&url, reader)
 	expected_link := "https://test.com/page/"
@@ -55,7 +50,6 @@ func TestReaderOneLinkSameHost(t *testing.T) {
 		t.Error("Expected ", expected_link, " got ", links)
 	}
 }
-
 
 func TestReaderOneLinkRelativeSimple(t *testing.T) {
 	reader := strings.NewReader("<a href=\"/page/\"></a>")
@@ -69,7 +63,6 @@ func TestReaderOneLinkRelativeSimple(t *testing.T) {
 	}
 }
 
-
 func TestReaderOneLinkRelativeComplex(t *testing.T) {
 	reader := strings.NewReader("<a href=\"/page/temp/../42/\"></a>")
 	url := url.URL{Host: "test.com", Scheme: "https"}
@@ -82,7 +75,6 @@ func TestReaderOneLinkRelativeComplex(t *testing.T) {
 	}
 }
 
-
 func TestReaderTwoLinksWithSameHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://test.com/page/\"></a><a href=\"https://test.com/another/page/\"></a>")
 	url := url.URL{Host: "test.com", Scheme: "https"}
@@ -92,10 +84,9 @@ func TestReaderTwoLinksWithSameHost(t *testing.T) {
 	expected_link2 := "https://test.com/another/page/"
 
 	if len(links) != 2 || links[0] != expected_link1 || links[1] != expected_link2 {
-		t.Error("Expected ", expected_link1, expected_link2,  " got ", links)
+		t.Error("Expected ", expected_link1, expected_link2, " got ", links)
 	}
 }
-
 
 func TestReaderTwoLinksRelative(t *testing.T) {
 	reader := strings.NewReader("<a href=\"/page/\"></a><a href=\"/another/42/../page/\"></a>")
@@ -106,10 +97,9 @@ func TestReaderTwoLinksRelative(t *testing.T) {
 	expected_link2 := "https://test.com/another/page/"
 
 	if len(links) != 2 || links[0] != expected_link1 || links[1] != expected_link2 {
-		t.Error("Expected ", expected_link1, expected_link2,  " got ", links)
+		t.Error("Expected ", expected_link1, expected_link2, " got ", links)
 	}
 }
-
 
 func TestReaderTwoLinksOneDifferentHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://not-a-test.com/page/\"></a><a href=\"/another/42/../page/\"></a>")
@@ -119,10 +109,9 @@ func TestReaderTwoLinksOneDifferentHost(t *testing.T) {
 	expected_link := "https://test.com/another/page/"
 
 	if len(links) != 1 || links[0] != expected_link {
-		t.Error("Expected ", expected_link,  " got ", links)
+		t.Error("Expected ", expected_link, " got ", links)
 	}
 }
-
 
 func TestReaderTwoLinksTwoDifferentHost(t *testing.T) {
 	reader := strings.NewReader("<a href=\"https://not-a-test.com/page/\"></a><a href=\"https://not-a-test.com/\"></a>")

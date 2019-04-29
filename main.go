@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gocrawl/fetcher"
 	"gocrawl/crawler"
+	"gocrawl/fetcher"
 	"gocrawl/sitemap"
 )
 
 func main() {
-	parallel_fetchers := flag.Int("n", 32, "number of parallel coroutines")
+	parallel_fetchers := flag.Int("n", 1000, "number of parallel coroutines")
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
@@ -25,5 +25,5 @@ func main() {
 
 	crawler.Crawl(url, &fetcher, &sitemap)
 
-	sitemap.Print()
+	sitemap.PrintReport()
 }
