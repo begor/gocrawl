@@ -5,8 +5,9 @@ import (
 	"sync"
 )
 
-// Sitemap represented as a thread-safe HashSet.
-// All syncronization happens under the hood using RWMutex to keep sync of shared mutable state inside black box.
+// Sitemap represented as two thread-safe HashMaps: 
+// one for url -> [children_url] mapping, one for url -> error mapping for those url that can't be fetched.
+// All syncronization happens under the hood (using RWMutex), clients can use it as black box without synchronization.
 type Sitemap struct {
 	urls   map[string][]string
 	errors map[string]error
@@ -17,6 +18,7 @@ func Create() Sitemap {
 	return Sitemap{urls: make(map[string][]string), errors: make(map[string]error), lock: sync.RWMutex{}}
 }
 
+// Mark url as visited: useful for exactly-once fetching before we sure about actual links/error fetched from that url.
 func (s *Sitemap) MarkVisited(url string) {
 	s.lock.Lock()
 
@@ -29,9 +31,7 @@ func (s *Sitemap) MarkVisited(url string) {
 
 func (s *Sitemap) SetLinks(url string, links []string) {
 	s.lock.Lock()
-
 	s.urls[url] = links
-
 	s.lock.Unlock()
 }
 
@@ -45,10 +45,9 @@ func (s *Sitemap) GetLinks(url string) ([]string, bool) {
 
 func (s *Sitemap) SetError(url string, err error) {
 	s.lock.Lock()
-
+	// If we've got error we should clear it's links for safety
 	delete(s.urls, url)
 	s.errors[url] = err
-
 	s.lock.Unlock()
 }
 
@@ -76,6 +75,9 @@ func (s *Sitemap) ErrSize() int {
 	return size
 }
 
+
+// Very simple printer for sitemap.
+// NOTE: in "real production" that'll live in separate package with interface and various implementations. 
 func (s *Sitemap) PrintReport(short_view bool) {
 	s.lock.RLock()
 

@@ -10,6 +10,8 @@ import (
 
 var log = logging.MustGetLogger("parser")
 
+
+// Parses given reader using goquery and extracts links (<a></a>) with same host as current_url
 func ExtractLinksWithCurrentHost(current_url *url.URL, reader io.Reader) ([]string, error) {
 	doc, err := goquery.NewDocumentFromReader(reader)
 

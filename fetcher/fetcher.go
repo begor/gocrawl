@@ -12,10 +12,12 @@ import (
 
 var log = logging.MustGetLogger("fetcher")
 
+// Using interface allows us to use DI and change implementation from HTTP to in-memory/file/...
 type Fetcher interface {
 	Get(string) (io.Reader, error)
 }
 
+// NOTE: in "real production" that should include retry/backoff policies, metering and so on.
 type HTTPLimitFetcher struct {
 	sem_chan chan int
 	client   *http.Client
