@@ -17,11 +17,6 @@ Formatting:
 make fmt
 ```
 
-Linting:
-```
-make lint
-```
-
 Building and running:
 ```
 go build
